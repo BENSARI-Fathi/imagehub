@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package imagehub;
+option go_package="./v1/pb";
+
+message CloneRequest {
+    string repos_path = 1;
+}
+
+message MetaData {
+    uint32 hash = 1;
+    string owner  = 2;
+    string folder_name = 3;
+}
+
+message CloneResponse {
+    oneof data {
+        MetaData metadata = 1;
+        bytes chunk_data = 2;
+      };
+}
+
+message RegisterResponse {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+}
+
+message RegisterRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+    string password2 = 4;
+}
+
+message UserCredentials {
+    string username = 1;
+    string password = 2;
+    uint32 hash = 3;
+    string repos_path = 4;
+}
+
+message PushRequest {
+    oneof data {
+        UserCredentials info = 1;
+        bytes chunk_data = 2;
+      };
+}
+
+message PushResponse {
+    string result = 1;
+}
+
+message CheckRequest {
+    MetaData metadata = 1;
+}
+
+enum CheckStatus {
+    UpToDate = 0;
+    UpdateFound = 1;
+}
+
+message CheckResponse {
+    CheckStatus status = 1;
+}
+
+service imageRepos{
+    rpc Clone (CloneRequest) returns (stream CloneResponse);
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Push (stream PushRequest) returns (PushResponse);
+    rpc Check (CheckRequest) returns (CheckResponse);
+}
